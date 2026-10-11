@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CULTIVAR // BOTANICAL DISPENSARY OS V6.0</title>
+<style>
+  :root {
+    --bg: #070c0e;
+    --panel: #0f191f;
+    --border: #1a3326;
+    --text: #cbd5e1;
+    --text-dim: #647d72;
+    --green: #10b981;
+    --green-bright: #34d399;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --cyan: #38bdf8;
+    --purple: #c084fc;
+    --gold: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: "Courier New", Courier, monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    overflow-x: hidden;
+    background-image: radial-gradient(circle at 50% 50%, #0d1e17 0%, #070c0e 85%);
+    background-attachment: fixed;
+  }
+  #terminal {
+    width: 100%;
+    max-width: 890px;
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.9);
+    overflow-x: hidden;
+  }
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed var(--green);
+    padding-bottom: 8px;
+    font-weight: bold;
+    color: var(--green);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .header-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .header-btn {
+    background: #09130e;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  .header-btn:hover { color: #fff; border-color: var(--green); }
+  .prestige-badge {
+    background: #1c1504;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  .prestige-badge:hover { background: #352605; color: #fff; }
+  .god-btn {
+    background: #251214;
+    border: 1px solid var(--red);
+    color: var(--red);
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  .god-btn.active { background: var(--red); color: #fff; box-shadow: 0 0 8px rgba(239,68,68,0.6); }
+  .nav-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+  @media (max-width: 640px) { .nav-grid { grid-template-columns: repeat(3, 1fr); } }
+  .nav-btn {
+    background: #09130e;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 8px 3px;
+    text-align: center;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nav-btn:hover { color: #fff; border-color: var(--green); }
+  .nav-btn.active {
+    background: var(--panel);
+    color: var(--green-bright);
+    border-color: var(--green);
+    box-shadow: inset 0 -2px 0 var(--green);
+  }
+  .tab-content { display: none; width: 100%; overflow-x: hidden; }
+  .tab-content.active-tab { display: block; }
+
+  /* GROW ROOMS & CANOPY */
+  .room-container {
+    background: #0b1410;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+  .room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #1a3224;
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: var(--cyan);
+    font-size: 11px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .quad-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 720px) { .quad-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 440px) { .quad-grid { grid-template-columns: 1fr; } }
+
+  .plant-card {
+    background: #0f1c16;
+    border: 1px solid #1c3627;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 11px;
+    position: relative;
+    min-height: 180px;
+  }
+  .plant-card.ready-glow {
+    border-color: var(--green-bright);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+  }
+  .plant-name {
+    font-weight: bold;
+    color: var(--text);
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .plant-type-badge {
+    font-size: 9px;
+    font-weight: bold;
+    padding: 1px 4px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .type-indica { background: #3b164a; color: var(--purple); }
+  .type-sativa { background: #3d2305; color: var(--amber); }
+  .type-hybrid { background: #0c3325; color: var(--green-bright); }
+  .bar-row { font-size: 10px; margin: 2px 0; }
+  .action-btn-mini {
+    background: #09130e;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 10px;
+    padding: 6px 4px;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+    margin-top: auto;
+  }
+  .action-btn-mini:hover { border-color: var(--green); color: #fff; }
+
+  /* KIOSK SLOTS */
+  .kiosk-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .kiosk-slot {
+    border: 1px solid var(--gold);
+    background: #171408;
+    padding: 10px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* LOG */
+  #log {
+    height: 120px;
+    background: #060b08;
+    border: 1px solid var(--border);
+    padding: 8px;
+    overflow-y: auto;
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .log-entry { color: var(--text); word-break: break-word; }
+  .log-alert { color: var(--amber); } .log-crit { color: var(--red); font-weight: bold; }
+  .log-success { color: var(--green-bright); font-weight: bold; } .log-info { color: var(--cyan); }
+  .log-legendary { color: var(--purple); font-weight: bold; } .log-gold { color: var(--gold); font-weight: bold; }
+
+  /* PANELS & LISTS */
+  .scroll-container { max-height: 400px; overflow-y: auto; overflow-x: hidden; background: #070d0a; border: 1px solid var(--border); padding: 8px; }
+  .item-card {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    padding: 10px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .item-info { flex: 1 1 240px; min-width: 0; }
+  .sort-bar {
+    display: flex; gap: 6px; align-items: center; background: #09130e;
+    border: 1px solid var(--border); padding: 6px 10px; margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .sort-bar span { font-size: 11px; color: var(--text-dim); }
+  .sort-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--text);
+    padding: 4px 7px; font-family: inherit; font-size: 10px; cursor: pointer;
+  }
+  .sort-btn.active { border-color: var(--green); color: var(--green); background: #0e2417; }
+  .forge-panel { border: 1px solid var(--purple); background: #140d1a; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .mystery-panel { border: 1px solid var(--gold); background: #1c1605; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .tier-hdr { padding: 6px 8px; font-weight: bold; color: var(--green); background: #0c1811; border-bottom: 1px solid var(--border); margin-top: 6px; }
+  .bestiary-row { font-size: 11px; padding: 5px 8px; border-bottom: 1px solid #14281c; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
+</style>
+</head>
+<body>
+
+<div id="terminal">
+  <div class="header-bar">
+    <span>CULTIVAR // BOTANICAL DISPENSARY OS</span>
+    <div class="header-controls">
+      <button class="prestige-badge" id="prestige-btn" onclick="executePrestige()">LICENSE: ★0</button>
+      <button class="header-btn" onclick="saveGame(false)">SAVE</button>
+      <button class="header-btn" style="color:var(--red);" onclick="wipeSave()">WIPE</button>
+      <button id="god-mode-btn" class="god-btn" onclick="toggleGodMode()">GOD MODE: OFF</button>
+      <span id="player-status">CASH: $250 | MGP: 0 | STOCK: 0g</span>
+    </div>
+  </div>
+
+  <div class="nav-grid">
+    <button id="nav-rooms" class="nav-btn active" onclick="setTab('rooms')">1. GROW ROOMS</button>
+    <button id="nav-kiosks" class="nav-btn" onclick="setTab('kiosks')">2. SHOP KIOSKS</button>
+    <button id="nav-nursery" class="nav-btn" onclick="setTab('nursery')">3. SEED NURSERY</button>
+    <button id="nav-depot" class="nav-btn" onclick="setTab('depot')">4. ENDLESS DEPOT</button>
+    <button id="nav-stash" class="nav-btn" onclick="setTab('stash')">5. CURED STASH</button>
+    <button id="nav-catalog" class="nav-btn" onclick="setTab('catalog')">6. 1100 STRAINS</button>
+  </div>
+
+  <!-- TAB 1: GROW ROOMS (HANDS-FREE CANOPY) -->
+  <div id="tab-rooms" class="tab-content active-tab">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+      <span style="font-weight:bold; color:var(--green-bright);">AUTONOMOUS CANOPY (HANDS-FREE GROWTH)</span>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <button class="header-btn" style="color:var(--green-bright); border-color:var(--green-bright);" onclick="harvestAllReady()">HARVEST ALL READY</button>
+        <button class="header-btn" style="color:var(--gold); border-color:var(--gold);" onclick="acquireMysterySeed()">MYSTERY SEED ($150)</button>
+        <button class="header-btn" style="color:var(--green); border-color:var(--green);" onclick="buyNewGrowRoom()">+ ADD 4-PLANT ROOM</button>
+      </div>
+    </div>
+    <div id="rooms-container"></div>
+  </div>
+
+  <!-- TAB 2: SHOP KIOSKS (DISPENSARY SALES MENU & AUTOMATION) -->
+  <div id="tab-kiosks" class="tab-content">
+    <div class="mystery-panel" style="border-color:var(--cyan); background:#0c1a22;">
+      <div style="font-weight:bold; color:var(--cyan); font-size:11px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+        <span>DISPENSARY STAFFING & KIOSK AUTOMATION</span>
+        <span id="staff-summary" style="color:var(--gold);">MANAGER: INACTIVE | EMPLOYEES: 0</span>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <button class="header-btn" id="manager-toggle-btn" style="color:var(--gold); border-color:var(--gold); padding:8px 12px;" onclick="toggleManager()">
+          HIRE MANAGER ($1,500)
+        </button>
+        <button class="header-btn" id="employee-hire-btn" style="color:var(--cyan); border-color:var(--cyan); padding:8px 12px;" onclick="hireEmployee()">
+          HIRE CLERK ($300) [SPEED +25%]
+        </button>
+        <div style="font-size:10px; color:var(--text-dim); flex:1;">
+          Manager auto-loads stash into kiosks & collects cash. Employees increase 200ms tick speed!
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+      <strong style="color:var(--gold);">5 RENEWING SALES KIOSKS (WHOLESALE DROPS)</strong>
+      <span id="kiosk-status-text" style="font-size:11px; color:var(--text-dim);">ACTIVE KIOSKS: 0 / 5</span>
+    </div>
+
+    <div class="kiosk-grid" id="kiosks-container"></div>
+  </div>
+
+  <!-- TAB 3: SEED NURSERY (MYSTERY SEED & 1-CLICK HYBRIDIZATION) -->
+  <div id="tab-nursery" class="tab-content">
+    <div class="mystery-panel">
+      <div style="font-weight:bold; color:var(--gold); font-size:11px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+        <span>★ BLACK MARKET MYSTERY VAULT SEED ★</span>
+        <span>COST: $150 (GRANTS +50% TO +150% YIELD & PRICE BUFF)</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <span style="font-size:11px; color:var(--text-dim);">Extracts a random strain across all 10 Tiers with an unrepeatable phenotype surge. Potency strictly capped at 99%.</span>
+        <button class="header-btn" style="background:#2d2105; color:var(--gold); border-color:var(--gold); padding:8px 14px; font-weight:bold;" onclick="acquireMysterySeed()">
+          BUY MYSTERY SEED ($150)
+        </button>
+      </div>
+    </div>
+
+    <div class="forge-panel">
+      <div style="font-weight:bold; color:var(--purple); font-size:11px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+        <span>R&D POLLINATION LAB // 1-CLICK HYBRIDIZATION</span>
+        <span>COST: $100 (69%–131% OF PEAK PARENT STATS)</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <button class="header-btn" style="background:#221532; color:var(--purple); border-color:var(--purple); padding:8px;" onclick="breedTopTwo('potency')">
+          HYBRIDIZE TOP 2 POTENCY ($100)
+        </button>
+        <button class="header-btn" style="background:#132635; color:var(--cyan); border-color:var(--cyan); padding:8px;" onclick="breedTopTwo('yield')">
+          HYBRIDIZE TOP 2 YIELD ($100)
+        </button>
+      </div>
+    </div>
+
+    <div class="sort-bar">
+      <span>GERMINATION SEED BANK:</span>
+      <span id="seed-count" style="color:var(--green-bright); margin-left:auto;">0 SEEDS PACKED</span>
+    </div>
+    <div class="scroll-container" id="seed-bank-list"></div>
+  </div>
+
+  <!-- TAB 4: ENDLESS DEPOT (ENDLESS CATEGORY UPGRADES: +3% TO +33%) -->
+  <div id="tab-depot" class="tab-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+      <div>
+        <strong style="color:var(--cyan);">ENDLESS FACILITY UPGRADE SUITE</strong>
+        <div style="font-size:10px; color:var(--text-dim);">Permanent +3% to +33% randomized multiplier per tier. Endless scaling!</div>
+      </div>
+    </div>
+    <div class="scroll-container" id="endless-upgrades-list"></div>
+  </div>
+
+  <!-- TAB 5: CURED STASH (METRIC ABBREVIATIONS & SHOP PUSH) -->
+  <div id="tab-stash" class="tab-content">
+    <div class="sort-bar">
+      <span>INVENTORY SORT:</span>
+      <button class="sort-btn active" id="sort-val" onclick="setStashSort('value')">VALUE</button>
+      <button class="sort-btn" id="sort-pot" onclick="setStashSort('potency')">POTENCY %</button>
+      <button class="sort-btn" id="sort-weight" onclick="setStashSort('weight')">METRIC WEIGHT</button>
+      <span id="stash-weight-total" style="color:var(--green-bright); margin-left:auto;">TOTAL STOCK: 0g</span>
+    </div>
+    <div class="scroll-container" id="stash-list"></div>
+  </div>
+
+  <!-- TAB 6: 1,100 STRAINS COMPENDIUM -->
+  <div id="tab-catalog" class="tab-content">
+    <div style="display:flex; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:4px;">
+      <span style="font-weight:bold; color:var(--green-bright);">OFFICIAL 10-TIER CANNABIS COMPENDIUM</span>
+      <span id="catalog-progress" style="color:var(--cyan);">UNLOCKED: 0 / 1100</span>
+    </div>
+    <div class="scroll-container" id="catalog-list"></div>
+  </div>
+
+  <!-- TERMINAL TELEMETRY LOG -->
+  <div id="log"></div>
+</div>
+
+<script>
+// --- PROCEDURAL 10-TIER / 1,100-STRAIN GENERATOR ---
+const LINEAGE_TIERS = [
+  { t:1, list:[
+    ["Acapulco Gold","Sativa",14,65],["Colombian Gold","Sativa",13,60],["Thai Stick","Sativa",15,55],
+    ["Afghani #1","Indica",16,70],["Hindu Kush","Indica",15,75],["Durban Poison","Sativa",15,65],
+    ["Lamb's Bread","Sativa",14,60],["Panama Red","Sativa",13,65],["Mazar-i-Sharif","Indica",16,72],["Malawi Gold","Sativa",15,58]
+  ]},
+  { t:2, list:[
+    ["Skunk #1","Hybrid",17,80],["Northern Lights","Indica",18,85],["Early Pearl","Hybrid",16,75],
+    ["Shiva Shanti","Indica",17,82],["Big Bud","Indica",15,110],["Wiet Haze","Sativa",17,70],
+    ["Hash Plant","Indica",18,80],["Sweet Tooth #1","Hybrid",17,78],["Cali Orange","Hybrid",16,82],["Kush #4","Indica",17,84]
+  ]},
+  { t:3, list:[
+    ["White Widow","Hybrid",19,90],["Jack Herer","Sativa",20,85],["Super Silver Haze","Sativa",21,80],
+    ["AK-47","Hybrid",20,95],["Blueberry 1998","Indica",19,85],["Bubblegum Dutch","Hybrid",18,90],
+    ["White Russian","Hybrid",21,92],["Amnesia Haze","Sativa",21,85],["Chitral Kush","Indica",18,95],["Great White Shark","Hybrid",19,100]
+  ]},
+  { t:4, list:[
+    ["OG Kush 1996","Hybrid",23,100],["Sour Diesel NYC","Sativa",22,105],["Chemdawg 91","Hybrid",23,98],
+    ["SFV OG Kush","Hybrid",24,102],["Tahoe OG","Indica",24,96],["East Coast Sour D","Sativa",23,104],
+    ["Underdog OG","Hybrid",23,100],["Ghost OG Cut","Hybrid",24,98],["Larry OG","Hybrid",23,102],["Headband Diesel","Hybrid",22,108]
+  ]},
+  { t:5, list:[
+    ["Blue Dream","Sativa",24,120],["Girl Scout Cookies","Hybrid",26,95],["Granddaddy Purple","Indica",23,110],
+    ["Green Crack","Sativa",22,125],["Trainwreck Arcata","Sativa",23,115],["Gorilla Glue #4","Hybrid",27,110],
+    ["Tangie Crockett","Sativa",22,118],["Thin Mint GSC","Hybrid",25,98],["Cherry Pie","Hybrid",24,105],["Master Kush","Indica",23,112]
+  ]},
+  { t:6, list:[
+    ["Gelato #33 Larry Bird","Hybrid",27,110],["Wedding Cake","Hybrid",28,115],["Sunset Sherbet","Hybrid",26,108],
+    ["Runtz Original","Hybrid",28,105],["Zkittlez 3rd Gen","Indica",25,110],["Biscotti Cut","Indica",27,105],
+    ["Ice Cream Cake","Indica",28,112],["Animal Mints","Hybrid",27,114],["Papaya Rosin Pheno","Indica",24,120],["Kush Mints","Hybrid",28,118]
+  ]},
+  { t:7, list:[
+    ["Gary Payton 20","Hybrid",29,115],["Apple Fritter Lumpy","Hybrid",28,125],["Cereal Milk","Hybrid",28,118],
+    ["Jealousy Seed Junky","Hybrid",30,112],["White Runtz","Hybrid",29,110],["Oreoz Gas","Indica",31,105],
+    ["Slurricane","Indica",28,118],["GMO Garlic Cookies","Indica",32,125],["MAC 1 Miracle Alien","Hybrid",29,112],["Gushers Cut","Hybrid",28,115]
+  ]},
+  { t:8, list:[
+    ["Zoap Deo Farms","Hybrid",31,120],["RS11 Rainbow Sherb","Hybrid",30,118],["Super Boof Blockhead","Hybrid",29,130],
+    ["Permanent Marker Doja","Hybrid",32,122],["Cap Junky Alien","Hybrid",33,120],["Donny Burger 87","Indica",32,128],
+    ["Pink Certz","Hybrid",30,122],["Gastro Pop #4","Hybrid",31,124],["Tear Gas Terps","Hybrid",32,118],["Red Bullz Compound","Hybrid",31,120]
+  ]},
+  { t:9, list:[
+    ["Moonbow 112 Archive","Hybrid",34,130],["Z-Cube 5th Gen","Hybrid",33,128],["Pure Michigan 2.0","Indica",34,125],
+    ["Carbon Fiber Pheno","Hybrid",33,132],["Grape Gas Compound","Hybrid",32,135],["Zack's Cake Jungle","Hybrid",34,130],
+    ["Sherbanger 22","Hybrid",33,134],["Motorbreath 15 King","Indica",35,130],["Highland Oaxacan 79","Sativa",31,145],["Rainbow Belts 3.0","Hybrid",33,128]
+  ]},
+  { t:10, list:[
+    ["Trinity Arcata 1994","Hybrid",36,150],["Emerald Triangle Mother","Hybrid",37,160],["Galactic God Bud 40%","Indica",39,155],
+    ["1996 Bubba Pre-98 Pure","Indica",36,152],["Overgrown Haze Grail","Sativa",35,175],["Hashishin Sovereign Cold-Cure","Indica",38,165],
+    ["Golden Goat Original Mom","Sativa",36,160],["Cryo-Rosin Diamond Beast","Hybrid",40,170],["Humboldt Seed Co Grail Pheno","Hybrid",38,168],["Apex Cultivar Zero","Hybrid",42,180]
+  ]}
+];
+
+const PHENO_MODS = [
+  "Cup Cut", "Hash Rosin Cut", "S1 Inbred", "F2 Select", "Diamond Terp",
+  "Backcross #1", "Cold-Cured Mother", "Tissue Culture Clean", "High-Brix Cut", "Living Soil Grail", "Apex Pheno"
+];
+
+const SPECIES_DB = [];
+LINEAGE_TIERS.forEach(tObj => {
+  tObj.list.forEach(([baseName, type, thc, yieldG]) => {
+    PHENO_MODS.forEach((mod, mIdx) => {
+      const scale = 1 + (mIdx * 0.035);
+      SPECIES_DB.push({
+        name: `${baseName} [${mod}]`,
+        tier: tObj.t,
+        type: type,
+        thc: Math.min(99, Math.round(thc * scale)),
+        maxYield: Math.round(yieldG * scale)
+      });
+    });
+  });
+});
+
+const DEAL_BROKERS = [
+  "SoCal_Distro", "Denver_Extracts", "Emerald_Express", "Vegas_TastingLounge",
+  "Oregon_CraftCo", "Amsterdam_Connoisseur", "Maine_CraftRosin", "Michigan_Wholesale",
+  "Underground_Pound_Broker", "Boutique_Dispensary_Buyer", "HighTimes_Judge_Vault"
+];
+
+const UPGRADES_CONFIG = [
+  { id: "light", name: "Photonic Spectrum & LED Arrays", desc: "Permanent boost to vegetative and bloom rate.", baseCost: 150 },
+  { id: "water", name: "Sub-Irrigation & Aeroponic Loops", desc: "Permanent boost to water retention and root oxygenation.", baseCost: 180 },
+  { id: "nutes", name: "Microbial Super-Soil & Bio-Nutrients", desc: "Permanent boost to base flower gram harvest weight.", baseCost: 200 },
+  { id: "co2", name: "Climate Control & CO2 Enrichment", desc: "Permanent boost to resin gland production & THC (Capped at 99%).", baseCost: 220 },
+  { id: "trim", name: "Precision Tumblers & Trichome Trimmers", desc: "Permanent boost to harvest preservation yield.", baseCost: 250 },
+  { id: "cure", name: "Humidor Curing Labs & Terpene Seals", desc: "Permanent boost to final lot market valuation.", baseCost: 300 }
+];
+
+// --- METRIC FORMATTING ENGINE ---
+function formatMetric(grams) {
+  if (!grams || isNaN(grams)) return "0g";
+  if (grams >= 1e12) return (grams / 1e12).toFixed(2) + "Mt";
+  if (grams >= 1e9) return (grams / 1e9).toFixed(2) + "kt";
+  if (grams >= 1e6) return (grams / 1e6).toFixed(2) + "t";
+  if (grams >= 1e3) return (grams / 1e3).toFixed(2) + "kg";
+  return Math.round(grams) + "g";
+}
+
+function formatCash(val) {
+  if (!val || isNaN(val)) return "$0";
+  if (val >= 1e12) return "$" + (val / 1e12).toFixed(2) + "T";
+  if (val >= 1e9) return "$" + (val / 1e9).toFixed(2) + "B";
+  if (val >= 1e6) return "$" + (val / 1e6).toFixed(2) + "M";
+  if (val >= 1e3) return "$" + (val / 1e3).toFixed(2) + "k";
+  return "$" + Math.round(val);
+}
+
+// --- STATE MANAGEMENT ---
+let state = {
+  cash: 250,
+  mgp: 0,
+  prestige: 0,
+  godMode: false,
+  manager: false,
+  employees: 0,
+  upgrades: {
+    light: { level: 0, mult: 1.0 },
+    water: { level: 0, mult: 1.0 },
+    nutes: { level: 0, mult: 1.0 },
+    co2:   { level: 0, mult: 1.0 },
+    trim:  { level: 0, mult: 1.0 },
+    cure:  { level: 0, mult: 1.0 }
+  },
+  rooms: [
+    { id: 1, name: "Tent #1 (4-Plant Setup)", slots: [null, null, null, null] }
+  ],
+  seeds: [],
+  stash: [],
+  discovered: {},
+  kiosks: [null, null, null, null, null], // 5 Self-renewing sales kiosks
+  stashSort: 'value'
+};
+
+function uid() { return 'u_' + Math.random().toString(36).substr(2, 9); }
+
+function saveGame(silent = false) {
+  const saveObj = {
+    cash: state.cash, mgp: state.mgp, prestige: state.prestige, godMode: state.godMode,
+    manager: state.manager, employees: state.employees, upgrades: state.upgrades,
+    rooms: state.rooms, seeds: state.seeds, stash: state.stash, discovered: state.discovered
+  };
+  try {
+    localStorage.setItem('cultivar_v6_save', JSON.stringify(saveObj));
+    if (!silent) writeLog("FACILITY SAVED: Canopy telemetry & dispensary stored.", "success");
+  } catch(e) { console.error("Save error", e); }
+}
+
+function loadGame() {
+  try {
+    const data = localStorage.getItem('cultivar_v6_save');
+    if (!data) return false;
+    const p = JSON.parse(data);
+    state.cash = p.cash ?? 250; state.mgp = p.mgp ?? 0; state.prestige = p.prestige ?? 0;
+    state.godMode = p.godMode ?? false; state.manager = p.manager ?? false; state.employees = p.employees ?? 0;
+    if (p.upgrades) state.upgrades = p.upgrades;
+    state.rooms = p.rooms ?? [{ id: 1, name: "Tent #1 (4-Plant Setup)", slots: [null, null, null, null] }];
+    state.seeds = p.seeds ?? []; state.stash = p.stash ?? []; state.discovered = p.discovered ?? {};
+    if (state.godMode) {
+      const b = document.getElementById("god-mode-btn");
+      if (b) { b.textContent = "GOD MODE: ON"; b.classList.add("active"); }
+    }
+    return true;
+  } catch(e) { return false; }
+}
+
+function wipeSave() {
+  if (confirm("Reset greenhouse facility, staff, seeds, and Master Grower license?")) {
+    localStorage.removeItem('cultivar_v6_save');
+    location.reload();
+  }
+}
+
+function toggleGodMode() {
+  state.godMode = !state.godMode;
+  const btn = document.getElementById("god-mode-btn");
+  if (state.godMode) {
+    btn.textContent = "GOD MODE: ON"; btn.classList.add("active");
+    state.cash = 999999999; state.mgp = 999999;
+    writeLog("GOD MODE ENGAGED: Infinite Funds, Max MGP & Instant Canopy Growth!", "gold");
+  } else {
+    btn.textContent = "GOD MODE: OFF"; btn.classList.remove("active");
+    state.cash = 1000;
+    writeLog("GOD MODE DISENGAGED: Standard operational parameters restored.", "alert");
+  }
+  saveGame(true);
+  updateUI();
+}
+
+function getPrestigeCost() {
+  return 500 + (state.prestige * 500);
+}
+
+function executePrestige() {
+  const reqMGP = getPrestigeCost();
+  if (state.mgp < reqMGP) {
+    writeLog(`COMMERCIAL LICENSE LOCKED: Requires ${reqMGP} Master Grower Points (Current: ${state.mgp} MGP).`, "crit");
+    return;
+  }
+  const nextRank = state.prestige + 1;
+  const confirmMsg = `RE-LICENSE FACILITY (PRESTIGE LEVEL ★${nextRank})?\n\n• Consumes: ${reqMGP} Master Grower Points\n• Resets: Active grow rooms to Room #1 starter\n• Permanent: +${nextRank * 15}% THC (Capped at 99%) & +${nextRank * 20}% Yield\n• Retains Seed Bank, Upgrades, Staff & Compendium.`;
+  if (confirm(confirmMsg)) {
+    state.mgp -= reqMGP;
+    state.prestige = nextRank;
+    state.cash = 500 + (state.prestige * 250);
+    state.rooms = [{ id: 1, name: "Tent #1 (4-Plant Setup)", slots: [null, null, null, null] }];
+    state.stash = [];
+    state.kiosks = [null, null, null, null, null];
+    writeLog(`*** COMMERCIAL FACILITY RE-LICENSED! RANK ★${state.prestige} CONFERRED! ***`, "gold");
+    saveGame(true);
+    updateUI();
+  }
+}
+
+function makeBar(cur, max) {
+  const size = 10;
+  const pct = Math.max(0, Math.min(1, cur / max));
+  const filled = Math.round(pct * size);
+  return `[${"█".repeat(filled)}${"░".repeat(size - filled)}]`;
+}
+
+function writeLog(msg, type = "normal") {
+  const el = document.getElementById("log");
+  const row = document.createElement("div");
+  row.className = `log-entry ${type ? 'log-' + type : ''}`;
+  row.textContent = `> ${msg}`;
+  el.appendChild(row);
+  el.scrollTop = el.scrollHeight;
+}
+
+function setTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  const tc = document.getElementById('tab-' + tabName);
+  const nb = document.getElementById('nav-' + tabName);
+  if (tc) tc.classList.add('active-tab');
+  if (nb) nb.classList.add('active');
+
+  if (tabName === 'rooms') renderRooms();
+  if (tabName === 'kiosks') renderKiosks();
+  if (tabName === 'nursery') renderNursery();
+  if (tabName === 'depot') renderUpgrades();
+  if (tabName === 'stash') renderStash();
+  if (tabName === 'catalog') renderCatalog();
+  updateUI();
+}
+
+// --- PLANT CREATION & CANOPY TICK (100% HANDS FREE) ---
+function createPlantInstance(seed) {
+  const prestigePotMult = 1 + (state.prestige * 0.15);
+  const prestigeYldMult = 1 + (state.prestige * 0.20);
+  const co2Boost = state.upgrades.co2.mult;
+  const soilBoost = state.upgrades.nutes.mult;
+
+  const finalThc = Math.min(99, Math.round(seed.thc * prestigePotMult * co2Boost));
+  const mysteryYld = seed.mysteryYieldMult || 1.0;
+  const finalMaxYield = Math.round(seed.maxYield * prestigeYldMult * soilBoost * mysteryYld);
+
+  return {
+    id: uid(),
+    name: seed.name,
+    tier: seed.tier,
+    type: seed.type,
+    thc: finalThc,
+    maxYield: finalMaxYield,
+    priceBonus: seed.mysteryPriceMult || 1.0,
+    stage: 0,
+    progress: 0
+  };
+}
+
+function plantSeedInSlot(roomId, slotIdx, seedId) {
+  const sIdx = state.seeds.findIndex(s => s.id === seedId);
+  if (sIdx === -1) return;
+  const seed = state.seeds[sIdx];
+  const room = state.rooms.find(r => r.id === roomId);
+  if (!room) return;
+
+  room.slots[slotIdx] = createPlantInstance(seed);
+  state.seeds.splice(sIdx, 1);
+  state.discovered[seed.name] = true;
+
+  writeLog(`Planted ${seed.name} in Room #${roomId} Slot ${slotIdx + 1}.`, "info");
+  saveGame(true);
+  renderRooms();
+  updateUI();
+}
+
+function harvestPlant(roomId, slotIdx) {
+  const room = state.rooms.find(r => r.id === roomId);
+  if (!room || !room.slots[slotIdx]) return;
+  const plant = room.slots[slotIdx];
+  if (plant.stage < 3 && !state.godMode) return;
+
+  const trimMultiplier = state.upgrades.trim.mult;
+  const cureMultiplier = state.upgrades.cure.mult;
+  const finalGrams = Math.round(plant.maxYield * trimMultiplier);
+  const priceBonus = plant.priceBonus || 1.0;
+
+  const curedBatch = {
+    id: uid(),
+    name: plant.name,
+    tier: plant.tier,
+    type: plant.type,
+    thc: Math.min(99, plant.thc),
+    grams: finalGrams,
+    value: Math.round(finalGrams * (plant.thc * 0.5) * Math.pow(1.3, plant.tier) * cureMultiplier * priceBonus)
+  };
+
+  state.stash.push(curedBatch);
+  room.slots[slotIdx] = null;
+
+  const mgpGain = 20 + (plant.tier * 8);
+  state.mgp += mgpGain;
+
+  writeLog(`HARVEST: ${formatMetric(curedBatch.grams)} of ${curedBatch.name} (${curedBatch.thc}% THC) stashed! +${mgpGain} MGP.`, "legendary");
+  saveGame(true);
+  renderRooms();
+  updateUI();
+}
+
+function harvestAllReady() {
+  let harvestedCount = 0;
+  state.rooms.forEach(room => {
+    room.slots.forEach((plant, idx) => {
+      if (plant && (plant.stage === 3 || state.godMode)) {
+        harvestPlant(room.id, idx);
+        harvestedCount++;
+      }
+    });
+  });
+  if (harvestedCount === 0) writeLog("No mature canopies ready for harvest yet.", "info");
+}
+
+// Autonomous Canopy Progress Engine
+function processCanopyTick() {
+  let changed = false;
+  state.rooms.forEach(room => {
+    room.slots.forEach(plant => {
+      if (!plant || plant.stage === 3) return;
+      changed = true;
+
+      const lightSpeed = state.godMode ? 35 : (1.5 + (state.upgrades.light.mult * 0.85));
+      plant.progress = Math.min(100, plant.progress + lightSpeed);
+
+      if (plant.progress >= 100) plant.stage = 3;
+      else if (plant.progress >= 60) plant.stage = 2;
+      else if (plant.progress >= 20) plant.stage = 1;
+      else plant.stage = 0;
+    });
+  });
+
+  const activeTab = document.querySelector('.nav-btn.active')?.id;
+  if (changed && activeTab === 'nav-rooms') {
+    renderRooms();
+  }
+}
+
+// --- RENDERING 4-PLANT ROOMS (HANDS-FREE) ---
+function renderRooms() {
+  const container = document.getElementById("rooms-container");
+  if (!container) return;
+  container.innerHTML = "";
+
+  state.rooms.forEach(room => {
+    const roomDiv = document.createElement("div");
+    roomDiv.className = "room-container";
+
+    roomDiv.innerHTML = `
+      <div class="room-header">
+        <span>${room.name}</span>
+        <span style="color:var(--text-dim);">LIGHT RATE: ${(state.upgrades.light.mult).toFixed(2)}x | YIELD FACTOR: ${(state.upgrades.nutes.mult * state.upgrades.trim.mult).toFixed(2)}x</span>
+      </div>
+      <div class="quad-grid" id="room-grid-${room.id}"></div>
+    `;
+
+    container.appendChild(roomDiv);
+    const quad = roomDiv.querySelector(`#room-grid-${room.id}`);
+
+    room.slots.forEach((plant, idx) => {
+      const pCard = document.createElement("div");
+      if (!plant) {
+        pCard.className = "plant-card";
+        pCard.innerHTML = `
+          <div style="color:var(--text-dim); font-weight:bold; text-align:center; margin-top:35px;">[CANOPY SLOT #${idx + 1}: EMPTY]</div>
+          <div style="font-size:10px; color:#475569; text-align:center; margin-bottom:10px;">Select seed to auto-grow</div>
+          <select class="action-btn-mini" onchange="if(this.value) plantSeedInSlot(${room.id}, ${idx}, this.value)">
+            <option value="">-- PLANT SEED --</option>
+            ${state.seeds.map(s => `<option value="${s.id}">[T${s.tier}] ${s.name} (${s.thc}%)</option>`).join('')}
+          </select>
+        `;
+      } else {
+        const isReady = plant.stage === 3;
+        pCard.className = `plant-card ${isReady ? 'ready-glow' : ''}`;
+        const stageNames = ["SEEDLING", "VEGETATIVE", "FLOWERING", "READY FOR HARVEST"];
+        const typeClass = plant.type.toLowerCase() === 'indica' ? 'type-indica' : (plant.type.toLowerCase() === 'sativa' ? 'type-sativa' : 'type-hybrid');
+
+        pCard.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="plant-type-badge ${typeClass}">${plant.type}</span>
+            <span style="font-weight:bold; color:var(--gold); font-size:10px;">${plant.thc}% THC</span>
+          </div>
+          <div class="plant-name" title="${plant.name}">${plant.name}</div>
+          <div style="font-size:10px; color:${isReady ? 'var(--green-bright)' : 'var(--cyan)'}; font-weight:bold; margin-top:2px;">
+            ${stageNames[plant.stage]}
+          </div>
+          <div class="bar-row" style="margin-top:8px;">GROWTH: ${makeBar(plant.progress, 100)} ${Math.round(plant.progress)}%</div>
+          <div class="bar-row">EST: <span style="color:var(--green-bright); font-weight:bold;">${formatMetric(plant.maxYield)}</span></div>
+          <div class="bar-row" style="color:var(--text-dim); font-size:9px;">Fully automated irrigation & nutrition active</div>
+          ${isReady ? `
+            <button class="action-btn-mini" style="background:#0f2b1d; color:var(--green-bright); font-weight:bold;" onclick="harvestPlant(${room.id},${idx})">
+              HARVEST
+            </button>
+          ` : `
+            <div style="margin-top:auto; font-size:9px; color:#475569; text-align:center;">AUTONOMOUS CYCLE...</div>
+          `}
+        `;
+      }
+      quad.appendChild(pCard);
+    });
+  });
+}
+
+function buyNewGrowRoom() {
+  const cost = Math.round(500 * Math.pow(1.65, state.rooms.length - 1));
+  if (state.cash < cost && !state.godMode) {
+    writeLog(`Requires $${cost} to construct next 4-plant room.`, "crit");
+    return;
+  }
+  if (!state.godMode) state.cash -= cost;
+  const newId = state.rooms.length + 1;
+  state.rooms.push({
+    id: newId,
+    name: `Room #${newId} (4-Plant Setup)`,
+    slots: [null, null, null, null]
+  });
+  writeLog(`Room #${newId} operational! +4 autonomous slots added.`, "success");
+  saveGame(true);
+  renderRooms();
+  updateUI();
+}
+
+// --- MYSTERY SEED VAULT BUTTON ---
+function acquireMysterySeed() {
+  const cost = 150;
+  if (state.cash < cost && !state.godMode) {
+    writeLog(`Requires $${cost} for Black Market Mystery Vault Seed.`, "crit");
+    return;
+  }
+  if (!state.godMode) state.cash -= cost;
+
+  const baseTmpl = SPECIES_DB[Math.floor(Math.random() * SPECIES_DB.length)];
+  const boostPct = Math.floor(Math.random() * 101) + 50; // +50% to +150%
+  const mult = 1 + (boostPct / 100);
+
+  const mysterySeed = {
+    id: uid(),
+    name: `[MYSTERY +${boostPct}%] ${baseTmpl.name}`,
+    tier: baseTmpl.tier,
+    type: baseTmpl.type,
+    thc: Math.min(99, Math.round(baseTmpl.thc * (1 + (boostPct * 0.12 / 100)))), // Capped strictly at 99%
+    maxYield: Math.round(baseTmpl.maxYield * mult),
+    mysteryYieldMult: mult,
+    mysteryPriceMult: mult
+  };
+
+  state.seeds.push(mysterySeed);
+  state.discovered[baseTmpl.name] = true;
+
+  writeLog(`★ MYSTERY SEED ACQUIRED! ★ [T${mysterySeed.tier}] ${mysterySeed.name} (+${boostPct}% Yield & Value, Cap 99% THC)!`, "gold");
+  saveGame(true);
+  renderNursery();
+  updateUI();
+}
+
+// --- 5 RENEWING SALES KIOSKS & STAFF AUTOMATION ---
+function launchBatchInKiosk(slotIdx, batch) {
+  const baseVal = batch.value;
+  const roll = Math.random();
+  let maxMult = 1.0;
+  if (roll < 0.15) maxMult = 0.33 + Math.random() * 0.57; // 33% - 90%
+  else if (roll < 0.60) maxMult = 1.0 + Math.random() * 3.0; // 100% - 400%
+  else if (roll < 0.88) maxMult = 4.0 + Math.random() * 11.0; // 400% - 1,500%
+  else if (roll < 0.97) maxMult = 15.0 + Math.random() * 35.0; // 1,500% - 5,000%
+  else maxMult = 50.0 + Math.random() * 50.0; // 5,000% - 10,000%
+
+  const targetFinalBid = Math.max(10, Math.round(baseVal * maxMult));
+  const startBid = Math.max(5, Math.round(baseVal * 0.33));
+
+  state.kiosks[slotIdx] = {
+    id: uid(),
+    batch: batch,
+    baseValue: baseVal,
+    currentBid: Math.min(startBid, targetFinalBid),
+    highestBidder: DEAL_BROKERS[Math.floor(Math.random() * DEAL_BROKERS.length)],
+    targetFinalBid: targetFinalBid,
+    timeLeft: 10.0,
+    noBidStreak: 0
+  };
+}
+
+function listOnKioskManual(batchId) {
+  const emptyIdx = state.kiosks.findIndex(k => k === null);
+  if (emptyIdx === -1) {
+    writeLog("All 5 sales kiosks are occupied! Wait for a transaction to complete.", "crit");
+    return;
+  }
+  const sIdx = state.stash.findIndex(s => s.id === batchId);
+  if (sIdx === -1) return;
+  const batch = state.stash[sIdx];
+  state.stash.splice(sIdx, 1);
+
+  launchBatchInKiosk(emptyIdx, batch);
+  writeLog(`KIOSK #${emptyIdx + 1}: Listed ${formatMetric(batch.grams)} ${batch.name} for retail bidding!`, "gold");
+  saveGame(true);
+  renderStash();
+  renderKiosks();
+}
+
+function toggleManager() {
+  if (!state.manager) {
+    const cost = 1500;
+    if (state.cash < cost && !state.godMode) {
+      writeLog("Requires $1,500 to hire the Dispensary Operations Manager.", "crit");
+      return;
+    }
+    if (!state.godMode) state.cash -= cost;
+    state.manager = true;
+    writeLog("MANAGER HIRED: All 5 sales kiosks are now automated!", "gold");
+  } else {
+    state.manager = false;
+    writeLog("Manager set to offline. Manual kiosk oversight engaged.", "alert");
+  }
+  saveGame(true);
+  renderKiosks();
+  updateUI();
+}
+
+function hireEmployee() {
+  const cost = Math.round(300 * Math.pow(1.35, state.employees));
+  if (state.cash < cost && !state.godMode) {
+    writeLog(`Requires $${cost} to hire next Sales Clerk / Budtender.`, "crit");
+    return;
+  }
+  if (!state.godMode) state.cash -= cost;
+  state.employees++;
+  writeLog(`CLERK HIRED! Staff size: ${state.employees}. Sales speed increased by +25%!`, "success");
+  saveGame(true);
+  renderKiosks();
+  updateUI();
+}
+
+// 200ms Rapid Kiosk & Manager Loop
+function processKiosksTick() {
+  let changed = false;
+  const speedMult = 1 + (state.employees * 0.25); // Employee speed multiplier
+
+  for (let i = 0; i < 5; i++) {
+    const kiosk = state.kiosks[i];
+
+    if (kiosk) {
+      changed = true;
+      kiosk.timeLeft = Math.max(0, +(kiosk.timeLeft - (0.2 * speedMult)).toFixed(1));
+
+      if (kiosk.timeLeft > 0) {
+        const rollPass = Math.random() < 0.50;
+        if (rollPass || kiosk.noBidStreak >= 4) {
+          kiosk.noBidStreak = 0;
+          const remainingTicks = Math.max(1, Math.round(kiosk.timeLeft * 5));
+          const gap = kiosk.targetFinalBid - kiosk.currentBid;
+          if (gap > 0) {
+            const randomFactor = 0.6 + (Math.random() * 0.8);
+            const inc = Math.max(5, Math.round((gap / remainingTicks) * randomFactor));
+            kiosk.currentBid = Math.min(kiosk.targetFinalBid, kiosk.currentBid + inc);
+            kiosk.highestBidder = DEAL_BROKERS[Math.floor(Math.random() * DEAL_BROKERS.length)];
+          }
+        } else {
+          kiosk.noBidStreak++;
+        }
+      } else {
+        // Lot Sold!
+        kiosk.currentBid = Math.max(kiosk.currentBid, kiosk.targetFinalBid);
+        if (!state.godMode) state.cash += kiosk.currentBid;
+        const profitPct = Math.round((kiosk.currentBid / kiosk.baseValue) * 100);
+        writeLog(`KIOSK #${i + 1} CLOSED: Sold ${formatMetric(kiosk.batch.grams)} to ${kiosk.highestBidder} for ${formatCash(kiosk.currentBid)} (${profitPct}%)!`, "gold");
+        state.kiosks[i] = null;
+        saveGame(true);
+      }
+    } else if (state.manager && state.stash.length > 0) {
+      // Manager auto-renews kiosk slot from stash
+      const nextBatch = state.stash.shift();
+      launchBatchInKiosk(i, nextBatch);
+      writeLog(`MANAGER AUTO-DROP: Loaded ${formatMetric(nextBatch.grams)} into Kiosk #${i + 1}.`, "info");
+      changed = true;
+    }
+  }
+
+  const activeTab = document.querySelector('.nav-btn.active')?.id;
+  if (changed && activeTab === 'nav-kiosks') {
+    renderKiosks();
+  }
+}
+
+function cashOutKioskManual(slotIdx) {
+  const kiosk = state.kiosks[slotIdx];
+  if (!kiosk) return;
+  if (!state.godMode) state.cash += kiosk.currentBid;
+  const profitPct = Math.round((kiosk.currentBid / kiosk.baseValue) * 100);
+  writeLog(`MANUAL SETTLEMENT: Sold to ${kiosk.highestBidder} for ${formatCash(kiosk.currentBid)} (${profitPct}%)!`, "success");
+  state.kiosks[slotIdx] = null;
+  saveGame(true);
+  renderKiosks();
+  updateUI();
+}
+
+function renderKiosks() {
+  const container = document.getElementById("kiosks-container");
+  const countEl = document.getElementById("kiosk-status-text");
+  const staffSummary = document.getElementById("staff-summary");
+  const managerBtn = document.getElementById("manager-toggle-btn");
+  const employeeBtn = document.getElementById("employee-hire-btn");
+  if (!container) return;
+
+  const activeCount = state.kiosks.filter(k => k !== null).length;
+  countEl.textContent = `ACTIVE KIOSKS: ${activeCount} / 5`;
+  staffSummary.textContent = `MANAGER: ${state.manager ? 'ONLINE (AUTONOMOUS)' : 'OFFLINE'} | EMPLOYEES: ${state.employees} (${Math.round((1 + state.employees * 0.25) * 100)}% Speed)`;
+
+  managerBtn.textContent = state.manager ? "MANAGER ACTIVE (CLICK TO PAUSE)" : "HIRE MANAGER ($1,500)";
+  const empCost = Math.round(300 * Math.pow(1.35, state.employees));
+  employeeBtn.textContent = `HIRE CLERK ($${empCost}) [+25% SPEED]`;
+
+  container.innerHTML = "";
+  for (let i = 0; i < 5; i++) {
+    const kiosk = state.kiosks[i];
+    const div = document.createElement("div");
+    if (!kiosk) {
+      div.className = "kiosk-slot";
+      div.style.borderColor = "#1e3328";
+      div.style.background = "#0c1510";
+      div.innerHTML = `
+        <div style="color:var(--text-dim); font-size:11px;">
+          <strong>KIOSK #${i + 1}: [IDLE RUNWAY]</strong>
+          <div style="font-size:10px; color:#475569;">${state.manager ? 'Manager will auto-load when stash has inventory' : 'Select a batch in Cured Stash to launch lot'}</div>
+        </div>
+      `;
+    } else {
+      div.className = "kiosk-slot";
+      const mult = (kiosk.currentBid / kiosk.baseValue).toFixed(2);
+      div.innerHTML = `
+        <div style="flex:1 1 220px; min-width:0;">
+          <strong style="color:var(--gold);">KIOSK #${i + 1}: ${formatMetric(kiosk.batch.grams)} ${kiosk.batch.name}</strong>
+          <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">
+            BASE: ${formatCash(kiosk.baseValue)} | COUNTDOWN: <span style="color:var(--red); font-weight:bold;">${kiosk.timeLeft.toFixed(1)}s</span>
+          </div>
+          <div style="font-size:12px; color:#fff; margin-top:3px;">
+            OFFER: <span style="color:var(--gold); font-weight:bold; font-size:13px;">${formatCash(kiosk.currentBid)}</span> (${mult}x) by <span style="color:var(--cyan);">${kiosk.highestBidder}</span>
+          </div>
+        </div>
+        <div>
+          <button class="header-btn" style="background:#2d260f; border-color:var(--gold); color:var(--gold); font-weight:bold; padding:8px 10px;" onclick="cashOutKioskManual(${i})">
+            SETTLE (${formatCash(kiosk.currentBid)})
+          </button>
+        </div>
+      `;
+    }
+    container.appendChild(div);
+  }
+}
+
+// --- SEED NURSERY & 1-CLICK HYBRIDIZATION ---
+function breedTopTwo(criteria) {
+  if (state.stash.length < 2) {
+    writeLog("Requires at least 2 cured batches in your Stash to extract breeding genetics!", "crit");
+    return;
+  }
+  const cost = 100;
+  if (state.cash < cost && !state.godMode) {
+    writeLog("Requires $100 for hybridization laboratory supplies.", "crit");
+    return;
+  }
+  if (!state.godMode) state.cash -= cost;
+
+  let sorted = [...state.stash];
+  if (criteria === 'potency') sorted.sort((a, b) => b.thc - a.thc);
+  else sorted.sort((a, b) => b.grams - a.grams);
+
+  const pA = sorted[0];
+  const pB = sorted[1];
+
+  const rollStat = (vA, vB) => {
+    const peak = Math.max(vA, vB);
+    const factor = (Math.floor(Math.random() * (131 - 69 + 1)) + 69) / 100;
+    return Math.max(10, Math.round(peak * factor));
+  };
+
+  const hybridStrain = {
+    id: uid(),
+    name: `${pA.name.split(' ')[0]} x ${pB.name.split(' ')[0]} Hybrid`,
+    tier: Math.max(pA.tier, pB.tier),
+    type: Math.random() < 0.5 ? "Hybrid" : (pA.type || "Hybrid"),
+    thc: Math.min(99, rollStat(pA.thc, pB.thc)), // Strictly capped at 99%
+    maxYield: rollStat(pA.grams, pB.grams)
+  };
+
+  state.seeds.push(hybridStrain);
+  state.discovered[hybridStrain.name] = true;
+
+  writeLog(`HYBRID SEED CREATED! ${hybridStrain.name} (${hybridStrain.thc}% THC / ${formatMetric(hybridStrain.maxYield)} Cap).`, "legendary");
+  saveGame(true);
+  renderNursery();
+  updateUI();
+}
+
+function renderNursery() {
+  const container = document.getElementById("seed-bank-list");
+  const countEl = document.getElementById("seed-count");
+  if (!container) return;
+  countEl.textContent = `${state.seeds.length} SEED PACKS AVAILABLE`;
+
+  if (state.seeds.length === 0) {
+    container.innerHTML = `<div style="color:var(--text-dim); text-align:center; padding:20px;">Seed bank empty. Roll a Mystery Seed or hybridize cured batches.</div>`;
+    return;
+  }
+  container.innerHTML = "";
+  state.seeds.forEach(s => {
+    const div = document.createElement("div");
+    div.className = "item-card";
+    div.innerHTML = `
+      <div class="item-info">
+        <strong style="color:var(--green-bright);">[T${s.tier}] ${s.name}</strong> (${s.type})
+        <div style="font-size:10px; color:var(--text-dim);">POTENCY PROFILE: ${s.thc}% THC | CANOPY CAPACITY: ${formatMetric(s.maxYield)}</div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// --- CURED STASH MANAGEMENT ---
+function setStashSort(mode) {
+  state.stashSort = mode;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('sort-' + (mode === 'value' ? 'val' : (mode === 'potency' ? 'pot' : 'weight')));
+  if (btn) btn.classList.add('active');
+  renderStash();
+}
+
+function renderStash() {
+  const container = document.getElementById("stash-list");
+  const weightTotal = document.getElementById("stash-weight-total");
+  if (!container) return;
+
+  const totalG = state.stash.reduce((acc, cur) => acc + cur.grams, 0);
+  weightTotal.textContent = `TOTAL STOCK: ${formatMetric(totalG)}`;
+
+  if (state.stash.length === 0) {
+    container.innerHTML = `<div style="color:var(--text-dim); text-align:center; padding:20px;">Curing bins empty. Harvest ready canopies in Room #1 to fill stash.</div>`;
+    return;
+  }
+
+  let sorted = [...state.stash];
+  if (state.stashSort === 'value') sorted.sort((a,b) => b.value - a.value);
+  else if (state.stashSort === 'potency') sorted.sort((a,b) => b.thc - a.thc);
+  else sorted.sort((a,b) => b.grams - a.grams);
+
+  container.innerHTML = "";
+  sorted.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "item-card";
+    div.innerHTML = `
+      <div class="item-info">
+        <strong style="color:var(--text);">${formatMetric(item.grams)} of ${item.name}</strong> 
+        <span style="color:var(--gold); font-size:10px;">[${item.thc}% THC]</span>
+        <div style="font-size:10px; color:var(--text-dim);">TIER: ${item.tier} | BASE VALUE: ${formatCash(item.value)}</div>
+      </div>
+      <div>
+        <button class="header-btn" style="color:var(--gold); border-color:var(--gold);" onclick="listOnKioskManual('${item.id}')">PUSH TO KIOSK</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// --- ENDLESS UPGRADES (+3% TO +33%) ---
+function getUpgradeCost(upgConfig) {
+  const currentLvl = state.upgrades[upgConfig.id].level;
+  return Math.round(upgConfig.baseCost * Math.pow(1.30, currentLvl));
+}
+
+function purchaseEndlessUpgrade(upgId) {
+  const upgConfig = UPGRADES_CONFIG.find(u => u.id === upgId);
+  if (!upgConfig) return;
+  const cost = getUpgradeCost(upgConfig);
+
+  if (state.cash < cost && !state.godMode) {
+    writeLog(`Requires $${cost} for ${upgConfig.name} upgrade!`, "crit");
+    return;
+  }
+  if (!state.godMode) state.cash -= cost;
+
+  const boostPct = Math.floor(Math.random() * (33 - 3 + 1)) + 3;
+  const boostMult = boostPct / 100;
+
+  state.upgrades[upgId].level++;
+  state.upgrades[upgId].mult += boostMult;
+
+  writeLog(`UPGRADE: ${upgConfig.name} Lv.${state.upgrades[upgId].level} (+${boostPct}% Permanent Multiplier)!`, "gold");
+  saveGame(true);
+  renderUpgrades();
+  updateUI();
+}
+
+function renderUpgrades() {
+  const container = document.getElementById("endless-upgrades-list");
+  if (!container) return;
+  container.innerHTML = "";
+
+  UPGRADES_CONFIG.forEach(upg => {
+    const curObj = state.upgrades[upg.id];
+    const cost = getUpgradeCost(upg);
+    const div = document.createElement("div");
+    div.className = "item-card";
+    div.innerHTML = `
+      <div class="item-info">
+        <strong style="color:var(--cyan);">${upg.name}</strong> 
+        <span style="color:var(--green-bright); font-size:10px;">[LVL ${curObj.level} | ${(curObj.mult * 100).toFixed(0)}% POWER]</span>
+        <div style="font-size:10px; color:var(--text-dim);">${upg.desc}</div>
+      </div>
+      <div>
+        <button class="header-btn" style="color:var(--green); border-color:var(--green);" onclick="purchaseEndlessUpgrade('${upg.id}')">
+          UPGRADE +3%–33% ($${cost})
+        </button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// --- 1,100 STRAIN CATALOG ---
+function renderCatalog() {
+  const container = document.getElementById("catalog-list");
+  if (!container) return;
+  container.innerHTML = "";
+  const discCount = Object.keys(state.discovered).length;
+  document.getElementById("catalog-progress").textContent = `UNLOCKED: ${discCount} / ${SPECIES_DB.length}`;
+
+  for (let t = 1; t <= 10; t++) {
+    const tierDiv = document.createElement("div");
+    tierDiv.className = "tier-hdr";
+    const tierPool = SPECIES_DB.filter(s => s.tier === t);
+    tierDiv.textContent = `TIER ${t} GENETICS (${tierPool.length} TOTAL VARIETALS)`;
+    container.appendChild(tierDiv);
+
+    tierPool.forEach(s => {
+      const isKnown = !!state.discovered[s.name];
+      const row = document.createElement("div");
+      row.className = "bestiary-row";
+      if (isKnown) {
+        row.innerHTML = `
+          <span style="color:var(--text); font-weight:bold;">${s.name} [${s.type}]</span>
+          <span style="color:var(--text-dim);">${s.thc}% THC | BASE CAP: ${formatMetric(s.maxYield)}</span>
+        `;
+      } else {
+        row.innerHTML = `
+          <span style="color:var(--text-dim);">??? [UNDISCOVERED CULTIVAR]</span>
+          <span style="color:var(--text-dim);">-- -- --</span>
+        `;
+      }
+      container.appendChild(row);
+    });
+  }
+}
+
+function updateUI() {
+  const totalStockG = state.stash.reduce((acc, cur) => acc + cur.grams, 0);
+  document.getElementById("player-status").textContent = `CASH: ${formatCash(state.cash)} | MGP: ${state.mgp} | STOCK: ${formatMetric(totalStockG)}`;
+  document.getElementById("prestige-btn").textContent = `LICENSE: ★${state.prestige} (REQ: ${getPrestigeCost()} MGP)`;
+}
+
+// --- BOOTSTRAP ---
+function init() {
+  const loaded = loadGame();
+  if (!loaded || state.seeds.length === 0) {
+    state.seeds = [
+      { id: uid(), name: SPECIES_DB[0].name, tier: 1, type: SPECIES_DB[0].type, thc: SPECIES_DB[0].thc, maxYield: SPECIES_DB[0].maxYield },
+      { id: uid(), name: SPECIES_DB[1].name, tier: 1, type: SPECIES_DB[1].type, thc: SPECIES_DB[1].thc, maxYield: SPECIES_DB[1].maxYield },
+      { id: uid(), name: SPECIES_DB[2].name, tier: 1, type: SPECIES_DB[2].type, thc: SPECIES_DB[2].thc, maxYield: SPECIES_DB[2].maxYield },
+      { id: uid(), name: SPECIES_DB[3].name, tier: 1, type: SPECIES_DB[3].type, thc: SPECIES_DB[3].thc, maxYield: SPECIES_DB[3].maxYield }
+    ];
+    state.discovered[SPECIES_DB[0].name] = true;
+    writeLog("Cultivar OS online. 1,100 Strains mapped across 10 Tiers.", "info");
+    writeLog("Assigned 4 starter landrace seeds to nursery bank.", "info");
+  } else {
+    writeLog(`FACILITY LOADED: License Rank ★${state.prestige} | MGP: ${state.mgp}.`, "gold");
+  }
+
+  // 1-second autonomous growth cycle
+  setInterval(processCanopyTick, 1000);
+  // 200ms ultra-rapid kiosk sales loop
+  setInterval(processKiosksTick, 200);
+  // Autosave
+  setInterval(() => saveGame(true), 15000);
+  window.addEventListener('beforeunload', () => saveGame(true));
+
+  renderRooms();
+  updateUI();
+}
+
+init();
+</script>
+</body>
+</html>
